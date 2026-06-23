@@ -23,9 +23,8 @@
       --coral-deep: #D44E32;
       --butter:     #F4C24B;
       --line:       rgba(42, 39, 35, 0.14);
-      --shadow:     22px 22px 0 rgba(42, 39, 35, 0.07);
 
-      --stage-w: 600px;
+      --stage-w: 1200px;
     }
 
     * { box-sizing: border-box; }
@@ -68,36 +67,25 @@
       padding: clamp(28px, 5vw, 64px) clamp(18px, 4vw, 24px) 56px;
     }
 
-    /* ── playable (square) ────────────────────────────── */
-    .play-wrap { position: relative; }
-    .play-tab {
-      position: absolute;
-      top: -13px; left: 22px;
-      z-index: 3;
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--coral);
-      color: #fff;
-      font-family: "DM Mono", monospace;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 7px 14px;
-      border-radius: 100px;
-      border: 2px solid var(--ink);
-      box-shadow: 3px 3px 0 var(--ink);
+    /* ── side-by-side layout ──────────────────────────── */
+    /* flex + stretch so the square canvas matches the panel's height */
+    .layout {
+      display: flex;
+      gap: clamp(22px, 3.2vw, 44px);
+      align-items: stretch;
+      justify-content: center;
     }
-    .play-tab .live { width: 7px; height: 7px; border-radius: 50%; background: #fff; animation: pulse-w 1.6s infinite; }
     @keyframes pulse-w { 0%,100%{opacity:1} 50%{opacity:.25} }
 
+    /* ── playable (square, height = details column) ───── */
+    .play-wrap { position: relative; flex: 0 0 auto; }
     .play-frame {
       position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;          /* square canvas */
+      aspect-ratio: 1 / 1;          /* square; JS sets explicit px = panel height on desktop */
       background:
         radial-gradient(130% 100% at 50% 0%, #DFF1EC 0%, var(--mint-wash) 60%, #BBE3D9 100%);
       border: 3px solid var(--ink);
       border-radius: 24px;
-      box-shadow: var(--shadow);
       overflow: hidden;
     }
     .play-frame canvas {
@@ -115,24 +103,13 @@
     .play-frame .rivet.bl { bottom: 12px; left: 12px; }
     .play-frame .rivet.br { bottom: 12px; right: 12px; }
 
-    .play-hint {
-      margin: 13px 4px 0;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px;
-      font-family: "DM Mono", monospace;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      color: var(--ink-soft);
-    }
-    .play-hint .crank { color: var(--coral-deep); text-transform: uppercase; letter-spacing: 0.16em; }
-
-    /* ── details (below canvas) ───────────────────────── */
+    /* ── details (beside canvas) ──────────────────────── */
     .panel {
-      margin-top: clamp(22px, 4vw, 34px);
+      flex: 0 0 360px;
+      align-self: flex-start;
       background: var(--paper-deep);
       border: 2px solid var(--ink);
       border-radius: 20px;
-      box-shadow: var(--shadow);
       overflow: hidden;
     }
     .panel .panel-head {
@@ -174,10 +151,10 @@
 
     .spec-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 24px;
+      grid-template-columns: 1fr;
     }
     .spec { border-top: 1px dashed var(--line); padding: 13px 0; }
+    .spec:first-child { border-top: 0; padding-top: 4px; }
     .spec .label {
       font-family: "DM Mono", monospace;
       font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -200,10 +177,10 @@
       border: 1.5px solid var(--ink);
       border-radius: 11px;
       padding: 11px 14px;
-      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+      transition: background .15s ease, color .15s ease;
     }
     .links a .arr { transition: transform .15s ease; }
-    .links a:hover { background: var(--mint); transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--ink); }
+    .links a:hover { background: var(--mint); }
     .links a:hover .arr { transform: translateX(3px); }
 
     /* entrance choreography */
@@ -212,73 +189,85 @@
     .d1{animation-delay:.05s}.d2{animation-delay:.2s}
     @media (prefers-reduced-motion: reduce) { .anim { animation: none; opacity: 1; transform: none; } }
 
-    @media (max-width: 560px) {
-      .spec-grid { grid-template-columns: 1fr; }
+    @media (max-width: 840px) {
+      .layout { flex-direction: column; align-items: stretch; gap: clamp(20px, 4vw, 30px); }
+      .panel { flex: 1 1 auto; align-self: auto; }
+      .play-frame { height: auto; width: 100%; max-width: 520px; margin: 0 auto; }
     }
   </style>
 </head>
 <body>
   <main class="stage">
+    <div class="layout">
 
-    <!-- playable, square, on top -->
-    <section class="play-wrap anim d1">
-      <span class="play-tab"><span class="live"></span>Live · Try it</span>
-      <div class="play-frame">
-        <span class="rivet tl"></span><span class="rivet tr"></span>
-        <span class="rivet bl"></span><span class="rivet br"></span>
-        <canvas id="rive-canvas"></canvas>
-      </div>
-      <div class="play-hint">
-        <span class="crank">▸ Crank the lever to start</span>
-        <span>Runs live · no install</span>
-      </div>
-    </section>
-
-    <!-- details, below the canvas -->
-    <aside class="panel anim d2">
-      <div class="panel-head"><span>Submission · No. 001</span><span class="dot"></span></div>
-      <div class="panel-body">
-
-        <div class="title-block">
-          <p class="kicker">Interactive Rive Animation</p>
-          <h1>BREAD ZEPPELIN <span class="pop">3000</span></h1>
-          <p class="tag">A pop-up toaster you can actually play. <span class="tk">[TK: final tagline]</span></p>
+      <!-- playable, square -->
+      <section class="play-wrap anim d1">
+        <div class="play-frame">
+          <span class="rivet tl"></span><span class="rivet tr"></span>
+          <span class="rivet bl"></span><span class="rivet br"></span>
+          <canvas id="rive-canvas"></canvas>
         </div>
+      </section>
 
-        <div class="spec-grid">
-          <div class="spec">
-            <p class="label">Made by</p>
-            <p class="value">Leo Mazzei<small>Mazzei Motion</small></p>
+      <!-- details, beside the canvas -->
+      <aside class="panel anim d2">
+        <div class="panel-head"><span>Submission · No. 001</span><span class="dot"></span></div>
+        <div class="panel-body">
+
+          <div class="title-block">
+            <p class="kicker">Interactive Rive Animation</p>
+            <h1>Toaster <span class="pop">Mini&#8209;Game</span></h1>
+            <p class="tag">Crank that lever! But watch out &mdash; this isn&rsquo;t a drill, it&rsquo;s a grill!</p>
           </div>
-          <div class="spec">
-            <p class="label">Category</p>
-            <p class="value">Playable interactive<small>Click / crank to play</small></p>
+
+          <div class="spec-grid">
+            <div class="spec">
+              <p class="label">Category</p>
+              <p class="value">Interactive Character</p>
+            </div>
+            <div class="spec">
+              <p class="label">Credits</p>
+              <p class="value">Design &amp; Animation<small>Leo Mazzei</small></p>
+              <p class="value">Copywriting<small>Leo Mazzei</small></p>
+            </div>
+            <div class="spec">
+              <p class="label">Built with</p>
+              <p class="value">Rive<small>Editor + Web runtime · State machine driven</small></p>
+            </div>
           </div>
-          <div class="spec">
-            <p class="label">Credits</p>
-            <p class="value">Design &amp; Animation<small>Leo Mazzei</small></p>
-            <p class="value">Sound design<small class="tk">[TK: credit]</small></p>
+
+          <div class="links">
+            <a href="https://contra.com/leomazzei/work?r=leomazzei" target="_blank" rel="noopener"><span>Contra profile</span><span class="arr">→</span></a>
+            <a href="https://mazzeimotion.com" target="_blank" rel="noopener"><span>mazzeimotion.com</span><span class="arr">→</span></a>
+            <a href="https://rive.app" target="_blank" rel="noopener"><span>Made in Rive</span><span class="arr">→</span></a>
           </div>
-          <div class="spec">
-            <p class="label">Built with</p>
-            <p class="value">Rive<small>Editor + Web runtime · State machine driven</small></p>
-          </div>
+
         </div>
+      </aside>
 
-        <div class="links">
-          <a href="#" target="_blank" rel="noopener"><span>Contra profile</span><span class="arr">→</span></a>
-          <a href="https://mazzeimotion.com" target="_blank" rel="noopener"><span>mazzeimotion.com</span><span class="arr">→</span></a>
-          <a href="https://rive.app" target="_blank" rel="noopener"><span>Made in Rive</span><span class="arr">→</span></a>
-        </div>
-
-      </div>
-    </aside>
-
+    </div>
   </main>
 
   <script src="https://unpkg.com/@rive-app/canvas"></script>
   <script>
     const canvas = document.getElementById("rive-canvas");
+    const frame  = canvas.parentElement;
+    const panel  = document.querySelector(".panel");
+    const stacked = () => window.matchMedia("(max-width: 840px)").matches;
+    let riveLoaded = false;
+
+    // square canvas, side === details-column height (cleared when stacked)
+    function syncSize() {
+      if (stacked()) {
+        frame.style.width = "";
+        frame.style.height = "";
+      } else {
+        const h = panel.offsetHeight;
+        frame.style.width = h + "px";
+        frame.style.height = h + "px";
+      }
+      if (riveLoaded) r.resizeDrawingSurfaceToCanvas();
+    }
 
     const r = new rive.Rive({
       src: "../_riv/toaster.riv",
@@ -291,15 +280,13 @@
         fit: rive.Fit.Contain,
         alignment: rive.Alignment.Center,
       }),
-      onLoad: () => {
-        r.resizeDrawingSurfaceToCanvas();
-      },
+      onLoad: () => { riveLoaded = true; syncSize(); },
     });
 
-    // keep the drawing buffer matched to the framed canvas as it resizes
-    const ro = new ResizeObserver(() => r.resizeDrawingSurfaceToCanvas());
-    ro.observe(canvas);
-    window.addEventListener("resize", () => r.resizeDrawingSurfaceToCanvas());
+    // re-sync whenever the panel reflows (content/fonts) or the window resizes
+    new ResizeObserver(syncSize).observe(panel);
+    window.addEventListener("resize", syncSize);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncSize);
   </script>
 </body>
 </html>
