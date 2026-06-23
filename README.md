@@ -15,9 +15,12 @@ as a **responsive square** centered in the viewport.
   (`@rive-app/canvas`). No build step.
 - **Layout:** square sized to `min(100vw, 100vh)`, flex-centered; re-fits on resize
   with `resizeDrawingSurfaceToCanvas()` for crisp HiDPI rendering.
-- **Wiring:** `autoplay: true`, `stateMachines: "State Machine 1"`, `autoBind: true`
+- **Wiring:** `artboard: "default"` (the complete game — `toaster` is the character-only
+  artboard), `autoplay: true`, `stateMachines: "State Machine 1"`, `autoBind: true`
   (binds the default `ToasterVM` instance automatically — no manual property plumbing
   for the basic embed).
+- **Aspect note:** the `default` game artboard is **landscape**; under `Fit.Contain` it
+  letterboxes (bands top/bottom) inside the square canvas, keeping the square-frame spec.
 - **Serve:** root the dev server at the **project folder** (`projects/toaster-game/`),
   not `_demo/`, so `../_riv/toaster.riv` resolves. Use `npx http-server . -p <port> -c-1`
   (avoids the `npx serve` clean-URLs path-rewrite gotcha — see [[js-runtime]]).
@@ -26,7 +29,7 @@ as a **responsive square** centered in the viewport.
 
 | Kind | Names |
 |---|---|
-| Artboard | `toaster` |
+| Artboard | `default` (full game), `toaster` (character only) |
 | State Machine | `State Machine 1` |
 | ViewModel | `ToasterVM` |
 | Triggers / inputs | `resetScore`, `tickScore`, `breadDone`, `breadJump`, `activate`, `toasterActivate`, `toasterTimeOut` |
