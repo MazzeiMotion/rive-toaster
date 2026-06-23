@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>toaster-game</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+      overflow: hidden;
+    }
+    /* Flex-center the square in the viewport */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Square sized to the smaller viewport dimension.
+       CSS pins the display size so resizeDrawingSurfaceToCanvas()
+       only scales the buffer (HiDPI), never the layout. */
+    #rive-canvas {
+      width: min(100vw, 100vh);
+      height: min(100vw, 100vh);
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="rive-canvas"></canvas>
+
+  <script src="https://unpkg.com/@rive-app/canvas"></script>
+  <script>
+    const canvas = document.getElementById("rive-canvas");
+
+    const r = new rive.Rive({
+      src: "../_riv/toaster.riv",
+      canvas: canvas,
+      artboard: "toaster",
+      stateMachines: "State Machine 1",
+      autoplay: true,
+      autoBind: true,
+      layout: new rive.Layout({
+        fit: rive.Fit.Contain,
+        alignment: rive.Alignment.Center,
+      }),
+      onLoad: () => {
+        r.resizeDrawingSurfaceToCanvas();
+      },
+    });
+
+    // Keep the drawing buffer matched to the (CSS-pinned) square on resize.
+    window.addEventListener("resize", () => r.resizeDrawingSurfaceToCanvas());
+  </script>
+</body>
+</html>
